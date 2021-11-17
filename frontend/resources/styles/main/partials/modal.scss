@@ -1140,11 +1140,15 @@
 
 .questions-form {
   .modal-container {
-    width: 100vw;
-    height: 100vh;
+    background-image: url("../images/deco-left.png"), url("../images/deco-right.png");
+    background-repeat: no-repeat;
+    background-position: 10% 50px, 90% 50px;
+    background-size: 65px;
     display: flex;
     flex-direction: row;
+    height: 100vh;
     justify-content: center;
+    width: 100vw;
 
     .af-form {
       --primary-color: #00C38B;
