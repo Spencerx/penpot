@@ -114,7 +114,8 @@
 (def default-interaction
   {:event-type :click
    :action-type :navigate
-   :destination nil})
+   :destination nil
+   :preserve-scroll false})
 
 (def default-delay 600)
 
@@ -153,7 +154,7 @@
       (assoc interaction
              :action-type action-type
              :destination (get interaction :destination)
-             :preserve-scroll false)
+             :preserve-scroll (get interaction :preserve-scroll false))
 
       (:open-overlay :toggle-overlay)
       (let [overlay-pos-type (get interaction :overlay-pos-type :center)
