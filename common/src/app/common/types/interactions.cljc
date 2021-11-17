@@ -9,6 +9,7 @@
    [app.common.data :as d]
    [app.common.geom.point :as gpt]
    [app.common.spec :as us]
+   [clojure.pprint :refer [pprint]]
    [clojure.spec.alpha :as s]))
 
 ;; WARNING: options are not deleted when changing event or action type, so it can be
@@ -199,10 +200,6 @@
   (and (has-destination interaction)
        (some? (:destination interaction))))
 
-(defn has-preserve-scroll
-  [interaction]
-  (= (:action-type interaction) :navigate))
-
 (defn set-destination
   [interaction destination]
   (us/verify ::interaction interaction)
@@ -216,6 +213,10 @@
         (= (:action-type interaction) :toggle-overlay))
     (assoc :overlay-pos-type :center
            :overlay-position (gpt/point 0 0))))
+
+(defn has-preserve-scroll
+  [interaction]
+  (= (:action-type interaction) :navigate))
 
 (defn set-preserve-scroll
   [interaction preserve-scroll]
@@ -289,7 +290,7 @@
 
 (defn- calc-overlay-pos-initial
   [destination shape objects overlay-pos-type]
-  (if (= overlay-pos-type :manual)
+  (if (and (= overlay-pos-type :manual) (some? destination))
     (let [dest-frame   (get objects destination)
           overlay-size (:selrect dest-frame)
           orig-frame   (if (= (:type shape) :frame)

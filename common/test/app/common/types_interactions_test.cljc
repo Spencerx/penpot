@@ -146,3 +146,102 @@
         (t/is (= :open-url (:action-type new-interaction)))
         (t/is (= "https://example.com" (:url new-interaction)))))))
 
+
+(t/deftest option-delay
+  (let [frame (cpi/make-minimal-shape :frame)
+        i1    cti/default-interaction
+        i2    (cti/set-event-type i1 :after-delay frame)]
+
+  (t/testing "Has delay"
+    (t/is (not (cti/has-delay i1)))
+    (t/is (cti/has-delay i2)))
+
+  (t/testing "Set delay"
+    (let [new-interaction (cti/set-delay i2 1000)]
+      (t/is (= 1000 (:delay new-interaction)))))))
+
+
+(t/deftest option-destination
+  (let [destination (uuid/next)
+        i1          cti/default-interaction
+        i2          (cti/set-action-type i1 :prev-screen)
+        i3          (cti/set-action-type i1 :open-overlay)]
+
+  (t/testing "Has destination"
+    (t/is (cti/has-destination i1))
+    (t/is (not (cti/has-destination i2))))
+
+  (t/testing "Set destination"
+    (let [new-interaction (cti/set-destination i1 destination)]
+      (t/is (= destination (:destination new-interaction)))
+      (t/is (nil? (:overlay-pos-type new-interaction)))
+      (t/is (nil? (:overlay-position new-interaction)))))
+
+  (t/testing "Set destination of overlay"
+    (let [new-interaction (cti/set-destination i3 destination)]
+      (t/is (= destination (:destination new-interaction)))
+      (t/is (= :center (:overlay-pos-type new-interaction)))
+      (t/is (= (gpt/point 0 0) (:overlay-position new-interaction)))))))
+
+
+(t/deftest option-preserve-scroll
+  (let [i1 cti/default-interaction
+        i2 (cti/set-action-type i1 :prev-screen)]
+
+  (t/testing "Has preserve-scroll"
+    (t/is (cti/has-preserve-scroll i1))
+    (t/is (not (cti/has-preserve-scroll i2))))
+
+  (t/testing "Set preserve-scroll"
+    (let [new-interaction (cti/set-preserve-scroll i1 true)]
+      (t/is (= true (:preserve-scroll new-interaction)))))))
+
+
+(t/deftest option-url
+  (let [i1 cti/default-interaction
+        i2 (cti/set-action-type i1 :open-url)]
+
+  (t/testing "Has url"
+    (t/is (not (cti/has-url i1)))
+    (t/is (cti/has-url i2)))
+
+  (t/testing "Set url"
+    (let [new-interaction (cti/set-url i2 "https://example.com")]
+      (t/is (= "https://example.com" (:url new-interaction)))))))
+
+
+(t/deftest option-overlay-opts
+  (let [base-frame    (-> (cpi/make-minimal-shape :frame)
+                          (assoc-in [:selrect :width] 100)
+                          (assoc-in [:selrect :height] 100))
+        overlay-frame (-> (cpi/make-minimal-shape :frame)
+                          (assoc-in [:selrect :width] 30)
+                          (assoc-in [:selrect :height] 20))
+        objects       {(:id base-frame) base-frame
+                       (:id overlay-frame) overlay-frame}
+
+        i1 cti/default-interaction
+        i2 (cti/set-action-type i1 :open-overlay)
+        i3 (-> i1
+               (cti/set-action-type :open-overlay)
+               (cti/set-destination (:id overlay-frame)))]
+
+  (t/testing "Has overlay options"
+    (t/is (not (cti/has-overlay-opts i1)))
+    (t/is (cti/has-overlay-opts i2)))
+
+  (t/testing "Set overlay-pos-type without destination"
+    (let [new-interaction (cti/set-overlay-pos-type i2 :top-right base-frame objects)]
+      (t/is (= :top-right (:overlay-pos-type new-interaction)))
+      (t/is (= (gpt/point 0 0) (:overlay-position new-interaction)))))
+
+  (t/testing "Set overlay-pos-type with destination and auto"
+    (let [new-interaction (cti/set-overlay-pos-type i3 :bottom-right base-frame objects)]
+      (t/is (= :bottom-right (:overlay-pos-type new-interaction)))
+      (t/is (= (gpt/point 0 0) (:overlay-position new-interaction)))))
+
+  (t/testing "Set overlay-pos-type with destination and manual"
+    (let [new-interaction (cti/set-overlay-pos-type i3 :manual base-frame objects)]
+      (t/is (= :manual (:overlay-pos-type new-interaction)))
+      (t/is (= (gpt/point 35 40) (:overlay-position new-interaction)))))
+  ))
