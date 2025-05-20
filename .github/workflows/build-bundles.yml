@@ -12,6 +12,7 @@ on:
           - individual
           - all
   schedule:
+    # Run every hour from 7:30 to 18:30 UTC, Monday to Friday
     - cron: '30 7 * * 1-5'
     - cron: '30 8 * * 1-5'
     - cron: '30 9 * * 1-5'
@@ -31,33 +32,52 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       skip: ${{ steps.check.outputs.skip }}
+      commit_count: ${{ steps.check.outputs.commit_count }}
 
     steps:
-      - name: Checkout develop
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      # Initialize Git and fetch remote history for comparison
+      - name: Prepare repository with remote
+        run: |
+          git init
+          git remote add origin https://github.com/${{ github.repository }}.git
+          git fetch origin develop
+          git checkout origin/develop
 
-      - name: Check if there are new commits in develop
+      # Compare HEAD with origin/develop to detect new commits
+      - name: Check if HEAD is behind origin/develop
         id: check
         run: |
           git fetch origin develop
-          NEW_COMMITS=$(git rev-list HEAD..origin/develop --count)
-          echo "Commits in develop since last run: $NEW_COMMITS"
+          LOCAL=$(git rev-parse HEAD)
+          REMOTE=$(git rev-parse origin/develop)
+          echo "Local:  $LOCAL"
+          echo "Remote: $REMOTE"
 
-          if [ "$NEW_COMMITS" -eq 0 ]; then
+          if [ "$LOCAL" = "$REMOTE" ]; then
             echo "skip=true" >> $GITHUB_OUTPUT
+            echo "commit_count=0" >> $GITHUB_OUTPUT
           else
+            COUNT=$(git rev-list $LOCAL..$REMOTE --count)
             echo "skip=false" >> $GITHUB_OUTPUT
+            echo "commit_count=$COUNT" >> $GITHUB_OUTPUT
           fi
+
+      # Log a message if no new commits are found
+      - name: "Log: No new commits found"
+        if: ${{ steps.check.outputs.skip == 'true' }}
+        run: echo "⏹️ No new commits in develop. Skipping build-bundles job."
 
   build-bundles:
     name: Build and Upload Penpot Bundles
     needs: check-develop
-    if: needs.check-develop.outputs.skip == 'false'
+    if: ${{ needs.check-develop.outputs.skip == 'false' }}
     runs-on: ubuntu-latest
 
     steps:
+      # Export number of new commits to env
+      - name: Export commit count to env
+        run: echo "COMMIT_COUNT=${{ needs.check-develop.outputs.commit_count }}" >> $GITHUB_ENV
+
       # Checkout the develop branch
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -178,16 +198,16 @@ jobs:
             done
           fi
 
-      # Notify Mattermost (optional)
-      - name: Notify Mattermost
-        if: always()
+      # Notify only if new commits were found
+      - name: Notify Mattermost (only if new commits)
+        if: ${{ env.COMMIT_COUNT != '0' }}
         run: |
           FECHA=$(date +%F)
           curl -X POST -H 'Content-Type: application/json' -d "{
-            \"text\": \"📦 *Penpot bundle generated*\n👤 Notified: @francis\nType: \\\`${ZIP_MODE}\\\`\nDate: \\\`${FECHA}\\\`\n🔗 [View artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\"
+            \"text\": \"📦 *Penpot bundle generated*\n🔄 Detected *${COMMIT_COUNT}* new commit(s) on \`develop\`\n👤 Notified: @francis\n🔗 [View artifacts](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})\"
           }" ${{ secrets.MATTERMOST_WEBHOOK }}
 
-      # Print GitHub artifact link
+      # Print GitHub artifact summary URL
       - name: Print artifact summary URL
         run: |
           echo "📦 Artifacts available at:"
