@@ -1885,6 +1885,14 @@ msgstr "Layout Element"
 msgid "inspect.tabs.styles.panel.toggle-style"
 msgstr "Toggle panel %s"
 
+#: src/app/main/ui/inspect/styles/style_box.cljs:12
+msgid "inspect.tabs.styles.panel.copy-to-clipboard"
+msgstr "Copy to clipboard"
+
+#: src/app/main/ui/inspect/styles/properties_row.cljs:48
+msgid "inspect.tabs.styles.token.resolved-value"
+msgstr "Resolved value:"
+
 #: src/app/main/ui/dashboard/comments.cljs:95
 msgid "label.mark-all-as-read"
 msgstr "Mark all as read"
@@ -2370,6 +2378,10 @@ msgstr "Profile"
 msgid "labels.projects"
 msgstr "Projects"
 
+#:src/app/main/ui/workspace/tokens/management/create/form.cljs
+msgid "labels.reference"
+msgstr "Reference"
+
 #: src/app/main/data/common.cljs:83
 msgid "labels.refresh"
 msgstr "Refresh"
@@ -2545,6 +2557,10 @@ msgstr "Themes"
 #: src/app/main/ui/dashboard/sidebar.cljs:904, src/app/main/ui/workspace/main_menu.cljs:124
 msgid "labels.tutorials"
 msgstr "Tutorials"
+
+#: src/app/main/ui/workspace/tokens/management/create/form.cljs
+msgid "labels.typography"
+msgstr "Typography"
 
 #: src/app/main/data/workspace/tokens/errors.cljs:93
 msgid "labels.unknown-error"
@@ -7730,6 +7746,22 @@ msgstr "Enter: none | uppercase | lowercase | capitalize or {alias}"
 #: src/app/main/ui/workspace/tokens/management/create/form.cljs:871, src/app/main/ui/workspace/tokens/management/create/form.cljs:898
 msgid "workspace.tokens.text-decoration-value-enter"
 msgstr "Enter text decoration: none | underline | strike-through"
+
+#: src/app/main/ui/workspace/tokens/management/create/form.cljs
+msgid "workspace.tokens.letter-spacing-value-enter-composite"
+msgstr "Add letter spacing or {alias}"
+
+#: src/app/main/ui/workspace/tokens/management/create/form.cljs
+msgid "workspace.tokens.individual-tokens"
+msgstr "Use individual tokens"
+
+#: src/app/main/ui/workspace/tokens/management/create/form.cljs
+msgid "workspace.tokens.use-reference"
+msgstr "Use a reference"
+
+#: src/app/main/ui/workspace/tokens/management/create/form.cljs
+msgid "workspace.tokens.reference-composite"
+msgstr "Enter a token typography alias"
 
 #: src/app/main/ui/workspace/tokens/themes/create_modal.cljs:130
 msgid "workspace.tokens.theme-name"
